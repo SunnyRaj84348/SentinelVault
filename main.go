@@ -11,6 +11,7 @@ func main() {
 	router := gin.Default()
 
 	router.POST("/upload", controllers.UploadFile)
+	router.GET("/download", controllers.DownloadFile)
 
 	err := router.Run(":8080")
 	if err != nil {

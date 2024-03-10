@@ -49,3 +49,35 @@ func UploadFile(ctx *gin.Context) {
 		"key": hex.EncodeToString(keyBytes),
 	})
 }
+
+func DownloadFile(ctx *gin.Context) {
+	fileData := struct {
+		FileName string `json:"filename" binding:"required"`
+		Key      string `json:"key" binding:"required"`
+	}{}
+
+	err := ctx.BindJSON(&fileData)
+	if err != nil {
+		return
+	}
+
+	fileData.FileName = filepath.Base(fileData.FileName)
+
+	cipherText, err := os.ReadFile("/mnt/e/enc_files/" + fileData.FileName)
+	if utilities.HandleBadRequest(ctx, err) {
+		return
+	}
+
+	key, err := hex.DecodeString(fileData.Key)
+	if utilities.HandleBadRequest(ctx, err) {
+		return
+	}
+
+	plainText, err := utilities.DecryptFile(cipherText, key)
+	if utilities.HandleBadRequest(ctx, err) {
+		return
+	}
+
+	ctx.Header("Content-Disposition", "attachment; filename="+fileData.FileName)
+	ctx.Data(http.StatusOK, "application/octet-stream", plainText)
+}

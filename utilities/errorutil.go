@@ -14,3 +14,12 @@ func HandleServerError(ctx *gin.Context, err error) bool {
 
 	return false
 }
+
+func HandleBadRequest(ctx *gin.Context, err error) bool {
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		return true
+	}
+
+	return false
+}
