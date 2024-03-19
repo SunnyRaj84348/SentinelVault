@@ -4,11 +4,14 @@ import (
 	"SentinelVault/controllers"
 	"log"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	router := gin.Default()
+
+	router.Use(cors.Default())
 
 	router.POST("/upload", controllers.UploadFile)
 	router.GET("/download", controllers.DownloadFile)
