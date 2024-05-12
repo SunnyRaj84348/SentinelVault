@@ -3,6 +3,7 @@ package models
 import (
 	"database/sql"
 	"log"
+	"os"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -10,7 +11,9 @@ import (
 var db *sql.DB
 
 func Connect() {
-	sdb, err := sql.Open("mysql", "user:pass@/sentinel")
+	dbURL := os.Getenv("DB_URL")
+
+	sdb, err := sql.Open("mysql", dbURL)
 	if err != nil {
 		log.Fatal(err)
 	}
