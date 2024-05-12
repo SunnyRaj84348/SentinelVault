@@ -2,6 +2,7 @@ package main
 
 import (
 	"SentinelVault/controllers"
+	"SentinelVault/models"
 	"log"
 
 	"github.com/gin-contrib/cors"
@@ -12,6 +13,9 @@ func main() {
 	router := gin.Default()
 
 	router.Use(cors.Default())
+
+	models.Connect()
+	defer models.Close()
 
 	router.POST("/upload", controllers.UploadFile)
 	router.GET("/download", controllers.DownloadFile)
