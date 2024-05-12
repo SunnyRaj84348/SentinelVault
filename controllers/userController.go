@@ -9,15 +9,30 @@ import (
 )
 
 func Signup(ctx *gin.Context) {
-	user := models.User{}
+	cred := models.User{}
 
-	err := ctx.BindJSON(&user)
+	err := ctx.BindJSON(&cred)
 	if utilities.HandleBadRequest(ctx, err) {
 		return
 	}
 
-	err = models.InsertUser(user)
+	err = models.InsertUser(cred)
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusConflict)
+	}
+}
+
+func Login(ctx *gin.Context) {
+	cred := models.User{}
+
+	err := ctx.BindJSON(&cred)
+	if utilities.HandleBadRequest(ctx, err) {
+		return
+	}
+
+	user, err := models.GetUser(cred.Username)
+	if (err != nil) || (user.Password != cred.Password) {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
 	}
 }
