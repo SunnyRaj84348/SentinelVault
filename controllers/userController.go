@@ -5,6 +5,7 @@ import (
 	"SentinelVault/utilities"
 	"net/http"
 
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 )
 
@@ -33,6 +34,14 @@ func Login(ctx *gin.Context) {
 	user, err := models.GetUser(cred.Username)
 	if (err != nil) || (user.Password != cred.Password) {
 		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	session := sessions.Default(ctx)
+	session.Set("user", user.UserID)
+
+	err = session.Save()
+	if utilities.HandleServerError(ctx, err) {
 		return
 	}
 }

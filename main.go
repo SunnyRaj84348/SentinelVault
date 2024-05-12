@@ -2,6 +2,7 @@ package main
 
 import (
 	"SentinelVault/controllers"
+	"SentinelVault/middlewares"
 	"SentinelVault/models"
 	"log"
 
@@ -11,14 +12,15 @@ import (
 )
 
 func main() {
-	router := gin.Default()
-
-	router.Use(cors.Default())
-
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	router := gin.Default()
+
+	router.Use(cors.Default())
+	router.Use(middlewares.Sessions())
 
 	models.Connect()
 	defer models.Close()
