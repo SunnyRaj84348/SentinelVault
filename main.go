@@ -20,6 +20,8 @@ func main() {
 	router.POST("/upload", controllers.UploadFile)
 	router.GET("/download", controllers.DownloadFile)
 
+	router.POST("/signup", controllers.Signup)
+
 	err := router.Run(":8080")
 	if err != nil {
 		log.Fatal(err)
