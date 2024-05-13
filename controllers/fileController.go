@@ -66,24 +66,30 @@ func UploadFile(ctx *gin.Context) {
 }
 
 func DownloadFile(ctx *gin.Context) {
-	fileData := struct {
-		FileName string `json:"filename" binding:"required"`
-		Key      string `json:"key" binding:"required"`
+	userid, _ := ctx.Get("userid")
+
+	fileQuery := struct {
+		FileID string `json:"file_id" binding:"required"`
+		EncKey string `json:"enc_key" binding:"required"`
 	}{}
 
-	err := ctx.BindJSON(&fileData)
-	if err != nil {
-		return
-	}
-
-	fileData.FileName = filepath.Base(fileData.FileName)
-
-	cipherText, err := os.ReadFile("/mnt/e/enc_files/" + fileData.FileName)
+	err := ctx.BindJSON(&fileQuery)
 	if utilities.HandleBadRequest(ctx, err) {
 		return
 	}
 
-	key, err := hex.DecodeString(fileData.Key)
+	fileData, err := models.GetFile(fileQuery.FileID, userid.(string))
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusNotFound)
+		return
+	}
+
+	cipherText, err := os.ReadFile("/mnt/e/enc_files/" + fileData.FileID)
+	if utilities.HandleServerError(ctx, err) {
+		return
+	}
+
+	key, err := hex.DecodeString(fileQuery.EncKey)
 	if utilities.HandleBadRequest(ctx, err) {
 		return
 	}
@@ -93,6 +99,14 @@ func DownloadFile(ctx *gin.Context) {
 		return
 	}
 
-	ctx.Header("Content-Disposition", "attachment; filename="+fileData.FileName)
+	hashByte := sha256.Sum256(plainText)
+	hash := hex.EncodeToString(hashByte[:])
+
+	if hash != fileData.FileHash {
+		ctx.AbortWithStatus(http.StatusConflict)
+		return
+	}
+
+	ctx.Header("Content-Disposition", "attachment; filename="+fileData.Filename)
 	ctx.Data(http.StatusOK, "application/octet-stream", plainText)
 }

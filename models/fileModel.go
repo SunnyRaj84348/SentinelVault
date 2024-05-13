@@ -14,3 +14,13 @@ func InsertFile(file File, userid string) (string, error) {
 
 	return file.FileID, err
 }
+
+func GetFile(fileID string, userID string) (File, error) {
+	fileData := File{}
+
+	row := db.QueryRow("SELECT * FROM file WHERE file_id = ? AND user_id = ?", fileID, userID)
+
+	err := row.Scan(&fileData.FileID, &fileData.Filename, &fileData.FileHash, &userID)
+
+	return fileData, err
+}
