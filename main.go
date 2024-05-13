@@ -29,6 +29,7 @@ func main() {
 	{
 		auth.POST("/upload", controllers.UploadFile)
 		auth.GET("/download", controllers.DownloadFile)
+		auth.GET("/get-files", controllers.GetFilesData)
 	}
 
 	router.POST("/signup", controllers.Signup)

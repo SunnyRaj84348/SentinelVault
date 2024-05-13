@@ -110,3 +110,14 @@ func DownloadFile(ctx *gin.Context) {
 	ctx.Header("Content-Disposition", "attachment; filename="+fileData.Filename)
 	ctx.Data(http.StatusOK, "application/octet-stream", plainText)
 }
+
+func GetFilesData(ctx *gin.Context) {
+	userid, _ := ctx.Get("userid")
+
+	filesData, err := models.GetAllFiles(userid.(string))
+	if utilities.HandleServerError(ctx, err) {
+		return
+	}
+
+	ctx.JSON(http.StatusOK, filesData)
+}
