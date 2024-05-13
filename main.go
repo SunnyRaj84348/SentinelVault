@@ -25,8 +25,11 @@ func main() {
 	models.Connect()
 	defer models.Close()
 
-	router.POST("/upload", controllers.UploadFile)
-	router.GET("/download", controllers.DownloadFile)
+	auth := router.Group("/", middlewares.Auth)
+	{
+		auth.POST("/upload", controllers.UploadFile)
+		auth.GET("/download", controllers.DownloadFile)
+	}
 
 	router.POST("/signup", controllers.Signup)
 	router.POST("/login", controllers.Login)
