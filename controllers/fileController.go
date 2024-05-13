@@ -34,6 +34,16 @@ func UploadFile(ctx *gin.Context) {
 		return
 	}
 
+	hashByte := sha256.Sum256(fileBytes)
+	hash := hex.EncodeToString(hashByte[:])
+
+	fileMeta := models.File{Filename: fileName, FileHash: hash}
+
+	fileID, err := models.InsertFile(fileMeta, userid.(string))
+	if utilities.HandleServerError(ctx, err) {
+		return
+	}
+
 	keyBytes, err := utilities.GenAESKey()
 	if utilities.HandleServerError(ctx, err) {
 		return
@@ -44,17 +54,7 @@ func UploadFile(ctx *gin.Context) {
 		return
 	}
 
-	err = os.WriteFile("/mnt/e/enc_files/"+fileName, cipherText, 0644)
-	if utilities.HandleServerError(ctx, err) {
-		return
-	}
-
-	hashByte := sha256.Sum256(fileBytes)
-	hash := hex.EncodeToString(hashByte[:])
-
-	fileMeta := models.File{Filename: fileName, FileHash: hash}
-
-	fileID, err := models.InsertFile(fileMeta, userid.(string))
+	err = os.WriteFile("/mnt/e/enc_files/"+fileID, cipherText, 0644)
 	if utilities.HandleServerError(ctx, err) {
 		return
 	}
