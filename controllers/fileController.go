@@ -3,7 +3,6 @@ package controllers
 import (
 	"SentinelVault/models"
 	"SentinelVault/utilities"
-	"crypto/sha256"
 	"encoding/hex"
 	"io"
 	"net/http"
@@ -35,12 +34,7 @@ func UploadFile(ctx *gin.Context) {
 		return
 	}
 
-	hashByte := sha256.Sum256(fileBytes)
-	hash := hex.EncodeToString(hashByte[:])
-
-	fileMeta := models.File{Filename: fileName, FileHash: hash}
-
-	fileID, err := models.InsertFile(fileMeta, userid.(int64))
+	fileID, err := models.InsertFile(fileName, userid.(int64))
 	if utilities.HandleServerError(ctx, err) {
 		return
 	}
@@ -97,14 +91,6 @@ func DownloadFile(ctx *gin.Context) {
 
 	plainText, err := utilities.DecryptFile(cipherText, key)
 	if utilities.HandleBadRequest(ctx, err) {
-		return
-	}
-
-	hashByte := sha256.Sum256(plainText)
-	hash := hex.EncodeToString(hashByte[:])
-
-	if hash != fileData.FileHash {
-		ctx.AbortWithStatus(http.StatusConflict)
 		return
 	}
 
