@@ -1,21 +1,19 @@
 package models
 
 type File struct {
-	FileID   string `json:"file_id"`
+	FileID   int64  `json:"file_id"`
 	Filename string `json:"filename"`
 	FileHash string `json:"-"`
 }
 
-func InsertFile(file File, userid string) (string, error) {
-	_, err := db.Exec("INSERT INTO file VALUES(DEFAULT, ?, ?, ?)", file.Filename, file.FileHash, userid)
-	row := db.QueryRow("SELECT file_id FROM file WHERE file_hash = ?", file.FileHash)
+func InsertFile(file File, userid int64) (int64, error) {
+	res, err := db.Exec("INSERT INTO file VALUES(DEFAULT, ?, ?, ?)", file.Filename, file.FileHash, userid)
 
-	row.Scan(&file.FileID)
-
-	return file.FileID, err
+	fileID, _ := res.LastInsertId()
+	return fileID, err
 }
 
-func GetFile(fileID string, userID string) (File, error) {
+func GetFile(fileID int64, userID int64) (File, error) {
 	fileData := File{}
 
 	row := db.QueryRow("SELECT * FROM file WHERE file_id = ? AND user_id = ?", fileID, userID)
@@ -25,7 +23,7 @@ func GetFile(fileID string, userID string) (File, error) {
 	return fileData, err
 }
 
-func GetAllFiles(userID string) ([]File, error) {
+func GetAllFiles(userID int64) ([]File, error) {
 	filesData := []File{}
 
 	rows, err := db.Query("SELECT * FROM file WHERE user_id = ?", userID)

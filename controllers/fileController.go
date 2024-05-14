@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -39,7 +40,7 @@ func UploadFile(ctx *gin.Context) {
 
 	fileMeta := models.File{Filename: fileName, FileHash: hash}
 
-	fileID, err := models.InsertFile(fileMeta, userid.(string))
+	fileID, err := models.InsertFile(fileMeta, userid.(int64))
 	if utilities.HandleServerError(ctx, err) {
 		return
 	}
@@ -54,7 +55,7 @@ func UploadFile(ctx *gin.Context) {
 		return
 	}
 
-	err = os.WriteFile("/mnt/e/enc_files/"+fileID, cipherText, 0644)
+	err = os.WriteFile("/mnt/e/enc_files/"+strconv.Itoa(int(fileID)), cipherText, 0644)
 	if utilities.HandleServerError(ctx, err) {
 		return
 	}
@@ -69,7 +70,7 @@ func DownloadFile(ctx *gin.Context) {
 	userid, _ := ctx.Get("userid")
 
 	fileQuery := struct {
-		FileID string `json:"file_id" binding:"required"`
+		FileID int64  `json:"file_id" binding:"required"`
 		EncKey string `json:"enc_key" binding:"required"`
 	}{}
 
@@ -78,13 +79,13 @@ func DownloadFile(ctx *gin.Context) {
 		return
 	}
 
-	fileData, err := models.GetFile(fileQuery.FileID, userid.(string))
+	fileData, err := models.GetFile(fileQuery.FileID, userid.(int64))
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusNotFound)
 		return
 	}
 
-	cipherText, err := os.ReadFile("/mnt/e/enc_files/" + fileData.FileID)
+	cipherText, err := os.ReadFile("/mnt/e/enc_files/" + strconv.Itoa(int(fileData.FileID)))
 	if utilities.HandleServerError(ctx, err) {
 		return
 	}
@@ -114,7 +115,7 @@ func DownloadFile(ctx *gin.Context) {
 func GetFilesData(ctx *gin.Context) {
 	userid, _ := ctx.Get("userid")
 
-	filesData, err := models.GetAllFiles(userid.(string))
+	filesData, err := models.GetAllFiles(userid.(int64))
 	if utilities.HandleServerError(ctx, err) {
 		return
 	}
