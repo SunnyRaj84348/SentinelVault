@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"net/http"
 	"os"
 
 	"github.com/gin-contrib/sessions"
@@ -13,6 +14,7 @@ func Sessions() gin.HandlerFunc {
 	store.Options(sessions.Options{
 		MaxAge:   60 * 60 * 24 * 30,
 		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
 	})
 
 	return sessions.Sessions("session_user", store)

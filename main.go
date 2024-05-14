@@ -6,7 +6,6 @@ import (
 	"SentinelVault/models"
 	"log"
 
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -19,7 +18,7 @@ func main() {
 
 	router := gin.Default()
 
-	router.Use(cors.Default())
+	router.Use(middlewares.Cors())
 	router.Use(middlewares.Sessions())
 
 	models.Connect()
