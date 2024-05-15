@@ -108,3 +108,39 @@ func GetFilesData(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, filesData)
 }
+
+func ShareFile(ctx *gin.Context) {
+	userid, _ := ctx.Get("userid")
+
+	fileInfo := struct {
+		FileID   int64  `json:"file_id" binding:"required"`
+		UserName string `json:"username" binding:"required"`
+	}{}
+
+	err := ctx.BindJSON(&fileInfo)
+	if utilities.HandleBadRequest(ctx, err) {
+		return
+	}
+
+	targetUser, err := models.GetUser(fileInfo.UserName)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusNotFound)
+		return
+	}
+
+	if userid.(int64) == targetUser.UserID {
+		ctx.AbortWithStatus(http.StatusConflict)
+		return
+	}
+
+	_, err = models.GetFile(fileInfo.FileID, userid.(int64))
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusForbidden)
+		return
+	}
+
+	err = models.InsertSharedFile(fileInfo.FileID, targetUser.UserID)
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusConflict)
+	}
+}

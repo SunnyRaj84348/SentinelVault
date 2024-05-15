@@ -27,6 +27,7 @@ func main() {
 	auth := router.Group("/", middlewares.Auth)
 	{
 		auth.POST("/upload", controllers.UploadFile)
+		auth.POST("/share-file", controllers.ShareFile)
 		auth.GET("/download", controllers.DownloadFile)
 		auth.GET("/get-files", controllers.GetFilesData)
 		auth.GET("/check-auth")
